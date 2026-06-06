@@ -62,8 +62,9 @@ export default function DonateModal({
           email: email.trim(),
           phone: phone.trim(),
           name: name.trim(),
-          organization_id,
-          interests
+          status: "activo",
+          organization_id: organization_id || null,
+          interests: interests || [],
         }),
       });
       const data = await res.json();
