@@ -42,14 +42,14 @@ export default function OnboardingFlow() {
   const [ongs, setOngs] = useState<Ong[]>([]);
   const [donateCampaign, setDonateCampaign] = useState<Campaign | null>(null);
   const [result, setResult] = useState<PaymentResult | null>(null);
-  const slides = document.querySelectorAll(".imagen-completa img");
+  const [activeSlide, setActiveSlide] = useState(0);
+  const slides = [
+    "/iStock-2171791895.jpg",
+    "/iStock-2199033973.jpg",
+    "/iStock-2205572960.jpg",
+    "/iStock-2258089084.jpg",
+  ];
 
-  slides.forEach((slide, index) => {
-    setTimeout(() => {
-      slides.forEach(s => s.classList.remove("active-slide"));
-      slide.classList.add("active-slide");
-    }, index * 5000);
-  });
   // Cargar las ONGs desde Supabase (antes era un array estático).
   useEffect(() => {
     fetchOngs().then(setOngs);
@@ -72,6 +72,16 @@ export default function OnboardingFlow() {
       window.history.replaceState(null, "", window.location.pathname);
     }
   }, []);
+
+  useEffect(() => {
+  const images = 4;
+
+  const interval = setInterval(() => {
+    setActiveSlide((prev) => (prev + 1) % images);
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, []);
 
   // Persistir nombre e intereses.
   useEffect(() => {
@@ -227,7 +237,7 @@ export default function OnboardingFlow() {
   const showCampaigns = step === 2 && interestedCampaigns.length > 0;
 
   const right = showCampaigns ? (
-    <div className="flex w-full flex-col gap-4">
+    <div className="flex w-full flex-col gap-4 py-8 md:py-12 md:px-20">
       <h2 className="text-2xl font-bold tracking-tight">Campañas activas</h2>
       <ul className="flex flex-col gap-3">
         {interestedCampaigns.map(({ campaign }) => (
@@ -258,10 +268,16 @@ export default function OnboardingFlow() {
     </div>
   ) : (
     <div className="imagen-completa">
-      <img src="/iStock-2171791895.jpg" alt="Foto(s) stock" className="active-slide rounded-3xl" />
-      <img src="/iStock-2199033973.jpg" alt="Foto(s) stock" className=" rounded-3xl" />
-      <img src="/iStock-2205572960.jpg" alt="Foto(s) stock" className=" rounded-3xl" />
-      <img src="/iStock-2258089084.jpg" alt="Foto(s) stock" className=" rounded-3xl" />
+      {slides.map((src, index) => (
+        <img
+          key={src}
+          src={src}
+          alt="Foto(s) stock"
+          className={`rounded-3xl ${
+            activeSlide === index ? "active-slide" : ""
+          }`}
+        />
+      ))}
     </div>
   );
 
