@@ -13,12 +13,51 @@ export default function BajaPage() {
 
   const canSubmit = email.trim() !== "" && reason !== "";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!canSubmit) return;
-    // Placeholder: acá iría el PATCH a donors (status="baja", cancelled_reason,
-    // cancelled_date) cuando esté la base.
-    setDone(true);
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await fetch(
+        "/api/unsubscribe",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            reason,
+            comment,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ?? "No se pudo procesar la baja"
+        );
+      }
+
+      setDone(true);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Error inesperado"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (done) {
@@ -84,12 +123,17 @@ export default function BajaPage() {
           />
         </label>
 
+        {error && (
+          <p className="text-sm text-red-600">
+            {error}
+          </p>
+        )}
         <button
           type="submit"
-          disabled={!canSubmit}
+          disabled={!canSubmit || loading}
           className="rounded-lg bg-neutral-900 px-6 py-3 text-base font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          Darme de baja
+          {loading ? "Procesando..." : "Darme de baja"}
         </button>
       </form>
     </main>

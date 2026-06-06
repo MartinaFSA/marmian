@@ -21,7 +21,7 @@ console.log("WEBHOOK BODY:", JSON.stringify(body, null, 2));
     );
 
     const payment = await response.json();
-console.log("PAYMENT:", JSON.stringify(payment, null, 2));
+    console.log("PAYMENT:", JSON.stringify(payment, null, 2));
     if (payment.status !== "approved") {
       return NextResponse.json({ ok: true });
     }
@@ -34,7 +34,7 @@ console.log("METADATA:", payment.metadata);
         name: metadata.name,
         phone: metadata.phone,
         email: metadata.email,
-        status: "paid",
+        status: metadata.status,
         organization_id: metadata.organization_id,
         interests: metadata.interests,
       });
