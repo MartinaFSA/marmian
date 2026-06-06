@@ -251,9 +251,7 @@ export default function OnboardingFlow() {
     </div>
   ) : (
     <div className="flex min-h-64 items-center justify-center text-neutral-500">
-      {step === 2
-        ? "Marcá “Me interesa” para ver las campañas de cada ONG."
-        : "Foto(s) stock"}
+      
     </div>
   );
 
@@ -261,17 +259,17 @@ export default function OnboardingFlow() {
     <>
       <main
         id="onboarding-page"
-        className="grid min-h-screen grid-cols-1 gap-6 p-6 md:grid-cols-2 md:p-10"
+        className="grid min-h-screen grid-cols-1 gap-6 md:grid-cols-2"
       >
-        <section className="flex items-start py-8 md:py-12">
+        <section className="flex items-start py-8 md:py-12 md:px-20">
           <div className="w-full max-w-md">{left}</div>
         </section>
 
         <aside
-          className={`flex py-8 md:py-12 ${
+          className={`flex py-8 md:py-12 md:px-20 ${
             showCampaigns
               ? "items-start"
-              : "min-h-64 items-center justify-center rounded-3xl bg-neutral-200"
+              : "min-h-64 items-center justify-center  bg-neutral-200"
           }`}
         >
           {right}

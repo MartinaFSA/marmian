@@ -93,9 +93,13 @@ export default function DonantesPage() {
   };
 
   const applyPreset = (status: StatusFilter, type: TypeFilter) => {
-    setStatusFilter(status);
-    setTypeFilter(type);
-    setBajaFilter("todos");
+    if(status === statusFilter || type === typeFilter){
+      resetFilters()
+    } else {
+      setStatusFilter(status);
+      setTypeFilter(type);
+      setBajaFilter("todos");
+    }
   };
 
   const selectedDonors = donors.filter((d) => selected.has(d.id));

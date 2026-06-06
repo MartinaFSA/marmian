@@ -56,7 +56,7 @@ export default function DonorActionModal({
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error ?? "No se pudo enviar.");
       setSent(
-        `Enviado: ${body.sent} email(s), uno por donante (al email de prueba), y registrado en communications.`,
+        `Enviado: ${body.sent} email(s).`,
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo enviar.");

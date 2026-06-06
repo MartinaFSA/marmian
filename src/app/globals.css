@@ -24,3 +24,10 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@theme {
+  --color-impacta: #7A6CB7;
+  --color-impacta-wh: #fff;
+  --color-impacta-faded: rgba(122, 108, 183, .2);
+  --color-impacta-wh-faded: rgba(255, 255, 255, .2);
+}

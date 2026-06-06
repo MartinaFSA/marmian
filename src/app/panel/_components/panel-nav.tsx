@@ -21,7 +21,7 @@ export default function PanelNav() {
   };
 
   return (
-    <header className="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
+    <header id="panel-header" className="bg-impacta flex items-center justify-between border-b border-neutral-200 px-6 py-4">
       <nav className="flex items-center gap-1">
         {LINKS.map((link) => {
           const active =
@@ -34,8 +34,8 @@ export default function PanelNav() {
               href={link.href}
               className={`rounded-lg px-3 py-2 text-sm transition-colors ${
                 active
-                  ? "bg-neutral-900 text-white"
-                  : "text-neutral-700 hover:bg-neutral-100"
+                  ? "bg-impacta-wh-faded text-white"
+                  : "text-impacta-wh hover:bg-impacta-wh-faded"
               }`}
             >
               {link.label}
@@ -46,7 +46,7 @@ export default function PanelNav() {
       <button
         type="button"
         onClick={handleLogout}
-        className="rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-700 transition-colors hover:border-neutral-900"
+        className="rounded-lg border bg-white border-neutral-300 px-3 py-2 text-sm text-neutral-700 transition-colors hover:border-impacta-wh hover:bg-impacta hover:text-impacta-wh"
       >
         Salir
       </button>
