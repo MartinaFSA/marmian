@@ -42,7 +42,14 @@ export default function OnboardingFlow() {
   const [ongs, setOngs] = useState<Ong[]>([]);
   const [donateCampaign, setDonateCampaign] = useState<Campaign | null>(null);
   const [result, setResult] = useState<PaymentResult | null>(null);
+  const slides = document.querySelectorAll(".imagen-completa img");
 
+  slides.forEach((slide, index) => {
+    setTimeout(() => {
+      slides.forEach(s => s.classList.remove("active-slide"));
+      slide.classList.add("active-slide");
+    }, index * 5000);
+  });
   // Cargar las ONGs desde Supabase (antes era un array estático).
   useEffect(() => {
     fetchOngs().then(setOngs);
@@ -104,7 +111,7 @@ export default function OnboardingFlow() {
   const left =
     step === 1 ? (
       <div className="flex w-full flex-col gap-8">
-        <h1 className="text-4xl font-bold tracking-tight">Bienvenidx</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Bienvenidx a Impacta</h1>
 
         <label className="flex flex-col gap-2">
           <span className="text-lg text-neutral-700">Nombre</span>
@@ -250,8 +257,16 @@ export default function OnboardingFlow() {
       </ul>
     </div>
   ) : (
+<<<<<<< Updated upstream
     <div className="flex min-h-64 items-center justify-center text-neutral-500">
       
+=======
+    <div className="imagen-completa">
+      <img src="/iStock-2171791895.jpg" alt="Foto(s) stock" className="active-slide rounded-3xl" />
+      <img src="/iStock-2199033973.jpg" alt="Foto(s) stock" className=" rounded-3xl" />
+      <img src="/iStock-2205572960.jpg" alt="Foto(s) stock" className=" rounded-3xl" />
+      <img src="/iStock-2258089084.jpg" alt="Foto(s) stock" className=" rounded-3xl" />
+>>>>>>> Stashed changes
     </div>
   );
 
@@ -266,7 +281,11 @@ export default function OnboardingFlow() {
         </section>
 
         <aside
+<<<<<<< Updated upstream
           className={`flex py-8 md:py-12 md:px-20 ${
+=======
+          className={`flex ${
+>>>>>>> Stashed changes
             showCampaigns
               ? "items-start"
               : "min-h-64 items-center justify-center  bg-neutral-200"

@@ -24,10 +24,32 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+<<<<<<< Updated upstream
 
 @theme {
   --color-impacta: #7A6CB7;
   --color-impacta-wh: #fff;
   --color-impacta-faded: rgba(122, 108, 183, .2);
   --color-impacta-wh-faded: rgba(255, 255, 255, .2);
+=======
+.imagen-completa {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.imagen-completa img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+.imagen-completa img.active-slide {
+  opacity: 1;
+>>>>>>> Stashed changes
 }
