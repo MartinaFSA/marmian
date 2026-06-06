@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  mockDonors,
   formatLastCharge,
   formatAmount,
   STATUS_LABELS,
@@ -35,21 +34,32 @@ const PRESETS: { label: string; status: StatusFilter; type: TypeFilter }[] = [
 ];
 
 export default function DonantesPage() {
+  const [donors, setDonors] = useState<MockDonor[]>([]);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("todos");
   const [bajaFilter, setBajaFilter] = useState<BajaFilter>("todos");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [modalDonors, setModalDonors] = useState<MockDonor[] | null>(null);
 
+  // Cargar los donantes desde Supabase (antes era el array mock).
+  useEffect(() => {
+    fetch("/api/donantes")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: MockDonor[]) => setDonors(data))
+      .catch(() => setDonors([]))
+      .finally(() => setLoading(false));
+  }, []);
+
   const filtered = useMemo(
     () =>
-      mockDonors.filter((d) => {
+      donors.filter((d) => {
         if (statusFilter !== "todos" && d.status !== statusFilter) return false;
         if (typeFilter !== "todos" && d.donationType !== typeFilter) return false;
         if (bajaFilter !== "todos" && d.bajaReason !== bajaFilter) return false;
         return true;
       }),
-    [statusFilter, typeFilter, bajaFilter],
+    [donors, statusFilter, typeFilter, bajaFilter],
   );
 
   const allVisibleSelected =
@@ -88,14 +98,16 @@ export default function DonantesPage() {
     setBajaFilter("todos");
   };
 
-  const selectedDonors = mockDonors.filter((d) => selected.has(d.id));
+  const selectedDonors = donors.filter((d) => selected.has(d.id));
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-bold tracking-tight">Donantes</h1>
         <p className="text-neutral-500">
-          {filtered.length} de {mockDonors.length} donantes
+          {loading
+            ? "Cargando…"
+            : `${filtered.length} de ${donors.length} donantes`}
         </p>
       </div>
 
@@ -251,7 +263,7 @@ export default function DonantesPage() {
       </div>
 
       <p className="text-xs text-neutral-400">
-        Datos de ejemplo (placeholder). El formulario público de baja está en{" "}
+        El formulario público de baja está en{" "}
         <Link href="/cancelar-suscripcion" className="underline">
           /cancelar-suscripcion
         </Link>
