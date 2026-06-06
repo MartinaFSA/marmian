@@ -188,7 +188,7 @@ export default function DonateModal({
             disabled={loading}
             className="rounded-lg bg-[#009ee3] px-6 py-3 text-base font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
           >
-            {loading ? "Redirigiendo…" : "Donar con Mercado Pago"}
+            {loading ? "Redirigiendo…" : "Donar con Mercado Pagoooo"}
           </button>
         )}
       </div>
