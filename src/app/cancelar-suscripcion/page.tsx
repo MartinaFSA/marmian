@@ -1,30 +1,97 @@
 "use client";
 
 import { useState } from "react";
-export default function BajaPage() {
-  const [password, setPassword] = useState("");
+import { BAJA_REASON_LABELS, type BajaReason } from "@/data/mock-donors";
 
-  const handleBaja = async () => {
-    // Handle baja logic here
+// Formulario público de baja. Captura el motivo ("tipo de baja"), que el panel
+// usa para segmentar comunicaciones. Placeholder: el submit no persiste todavía.
+export default function BajaPage() {
+  const [email, setEmail] = useState("");
+  const [reason, setReason] = useState<BajaReason | "">("");
+  const [comment, setComment] = useState("");
+  const [done, setDone] = useState(false);
+
+  const canSubmit = email.trim() !== "" && reason !== "";
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    // Placeholder: acá iría el PATCH a donors (status="baja", cancelled_reason,
+    // cancelled_date) cuando esté la base.
+    setDone(true);
   };
 
-  return (
-    <div className="max-w-md mx-auto">
-    {/* <h1 className="text-2xl font-bold mb-4">Darme de baja</h1>
-    <label htmlFor="email" className="block mb-2">Para confirmar, ingresa tu contraseña:</label>
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+  if (done) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-3 p-6 text-center">
+        <h1 className="text-2xl font-bold tracking-tight">Baja registrada</h1>
+        <p className="text-neutral-600">
+          Lamentamos que te vayas. Gracias por tu apoyo (placeholder, sin persistir).
+        </p>
+      </main>
+    );
+  }
 
-      <button
-        onClick={handleBaja}
-        className="bg-blue-600 text-white p-2 mt-4 w-full"
-      >
-        Darme de baja
-      </button> */}
-    </div>
+  return (
+    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-5 p-6">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold tracking-tight">Darme de baja</h1>
+        <p className="text-sm text-neutral-500">
+          Contanos el motivo para poder mejorar.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <label className="flex flex-col gap-1">
+          <span className="text-sm text-neutral-700">
+            E-mail <span className="text-red-500">*</span>
+          </span>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="tu@email.com"
+            required
+            className="rounded-lg border border-neutral-300 px-3 py-2 outline-none focus:border-neutral-900"
+          />
+        </label>
+
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-sm text-neutral-700">
+            Motivo de baja <span className="text-red-500">*</span>
+          </legend>
+          {(Object.keys(BAJA_REASON_LABELS) as BajaReason[]).map((r) => (
+            <label key={r} className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="reason"
+                value={r}
+                checked={reason === r}
+                onChange={() => setReason(r)}
+              />
+              {BAJA_REASON_LABELS[r]}
+            </label>
+          ))}
+        </fieldset>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-sm text-neutral-700">Comentario (opcional)</span>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            rows={3}
+            className="rounded-lg border border-neutral-300 px-3 py-2 outline-none focus:border-neutral-900"
+          />
+        </label>
+
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className="rounded-lg bg-neutral-900 px-6 py-3 text-base font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+        >
+          Darme de baja
+        </button>
+      </form>
+    </main>
   );
 }
