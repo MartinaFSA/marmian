@@ -60,7 +60,10 @@ export default function DonateModal({
           campaignId: campaign.id,
           amount,
           email: email.trim(),
-          phone: phone.trim() || undefined,
+          phone: phone.trim(),
+          name: name.trim(),
+          organization_id,
+          interests
         }),
       });
       const data = await res.json();
@@ -116,7 +119,9 @@ export default function DonateModal({
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-neutral-700">Teléfono (opcional)</span>
+          <span className="text-sm text-neutral-700">
+            Teléfono <span className="text-red-500">*</span>
+          </span>
           <input
             type="tel"
             value={phone}

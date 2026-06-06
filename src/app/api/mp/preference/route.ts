@@ -7,8 +7,15 @@ import { getCampaign } from "@/data/campaigns";
 // init_point del sandbox para redirigir al usuario a pagar.
 export async function POST(request: Request) {
   try {
-    const { campaignId, amount, email, phone } = await request.json();
-
+    const {
+      campaignId,
+      amount,
+      email,
+      phone,
+      name,
+      organization_id,
+      interests,
+    } = await request.json();
     const campaign = getCampaign(Number(campaignId));
     if (!campaign) {
       return NextResponse.json(
@@ -46,8 +53,17 @@ export async function POST(request: Request) {
           failure: `${baseUrl}/?mp=return`,
           pending: `${baseUrl}/?mp=return`,
         },
+        notification_url: "https://marmian.vercel.app/api/mp/webhook",
         auto_return: "approved",
-        metadata: { campaign_id: campaign.id, ong_id: campaign.ongId },
+        metadata: {
+          campaign_id: campaign.id,
+          ong_id: campaign.ongId,
+          name,
+          phone,
+          email,
+          organization_id,
+          interests,
+        },
       },
     });
 
