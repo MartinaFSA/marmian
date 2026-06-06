@@ -2,13 +2,19 @@
 
 import { useState } from "react";
 import type { MockDonor } from "@/data/mock-donors";
-import { getSegment, getTemplate, SEGMENT_LABELS } from "@/data/message-templates";
+import {
+  getSegment,
+  getSegmentTemplate,
+  renderTemplate,
+  SEGMENT_LABELS,
+} from "@/data/message-templates";
 import type { Segment } from "@/data/message-templates";
 
 // Modal de acciones de comunicación. Funciona tanto para un donante (acción de
-// fila) como para una selección (acción masiva). El envío real está stubbeado:
-// solo confirma a cuántos se enviaría. Reemplazar el handler cuando se integre
-// el proveedor de email / WhatsApp.
+// fila) como para una selección (acción masiva). El email se envía de verdad por
+// Resend vía /api/comunicaciones (un mensaje por segmento, al email de prueba
+// mientras los donantes sean mock) y se registra en la tabla communications.
+// WhatsApp sigue stubbeado.
 export default function DonorActionModal({
   donors,
   onClose,
@@ -17,18 +23,52 @@ export default function DonorActionModal({
   onClose: () => void;
 }) {
   const [sent, setSent] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Plantilla de ejemplo por cada segmento presente en la selección.
+  // Plantilla (con variables {{ nombre }} / {{ tema }}) por cada segmento presente.
   const segments = Array.from(new Set(donors.map(getSegment))) as Segment[];
   const samplesBySegment = segments.map((seg) => ({
     seg,
     count: donors.filter((d) => getSegment(d) === seg).length,
-    sample: getTemplate(donors.find((d) => getSegment(d) === seg)!),
+    sample: getSegmentTemplate(seg),
   }));
 
-  const handleSend = (channel: "email" | "whatsapp") => {
-    const label = channel === "email" ? "email" : "WhatsApp";
-    setSent(`Se enviaría por ${label} a ${donors.length} donante(s) (placeholder, sin envío real).`);
+  const handleSendEmail = async () => {
+    setSending(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/comunicaciones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          // Un mensaje por donante seleccionado, con su plantilla ya renderizada.
+          messages: donors.map((donor) => {
+            const seg = getSegment(donor);
+            return {
+              segment: seg,
+              label: SEGMENT_LABELS[seg],
+              text: renderTemplate(donor),
+            };
+          }),
+        }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(body?.error ?? "No se pudo enviar.");
+      setSent(
+        `Enviado: ${body.sent} email(s), uno por donante (al email de prueba), y registrado en communications.`,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo enviar.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleSendWhatsapp = () => {
+    setSent(
+      `Se enviaría por WhatsApp a ${donors.length} donante(s) (placeholder, sin envío real).`,
+    );
   };
 
   return (
@@ -78,21 +118,26 @@ export default function DonorActionModal({
         {sent ? (
           <p className="text-sm text-green-600">{sent}</p>
         ) : (
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => handleSend("email")}
-              className="flex-1 rounded-lg bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
-              Enviar email
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSend("whatsapp")}
-              className="flex-1 rounded-lg bg-[#25D366] px-4 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
-              Enviar WhatsApp
-            </button>
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleSendEmail}
+                disabled={sending}
+                className="flex-1 rounded-lg bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                {sending ? "Enviando…" : "Enviar email"}
+              </button>
+              <button
+                type="button"
+                onClick={handleSendWhatsapp}
+                disabled={sending}
+                className="flex-1 rounded-lg bg-[#25D366] px-4 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                Enviar WhatsApp
+              </button>
+            </div>
+            {error && <p className="text-sm text-red-600">{error}</p>}
           </div>
         )}
       </div>

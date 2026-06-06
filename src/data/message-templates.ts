@@ -28,21 +28,27 @@ function interestLabel(donor: MockDonor): string {
   return match ? match.cat.toLowerCase() : "las causas que te importan";
 }
 
-// Devuelve el texto de mensaje sugerido para un donante según su segmento.
-export function getTemplate(donor: MockDonor): string {
-  const nombre = donor.name.split(" ")[0];
-  const tema = interestLabel(donor);
-
-  switch (getSegment(donor)) {
+// Plantilla (template) de cada segmento, con variables {{ nombre }} y {{ tema }}.
+// Es el texto que se muestra en el panel y el que se persiste como `template`.
+export function getSegmentTemplate(segment: Segment): string {
+  switch (segment) {
     case "potencial":
-      return `Hola ${nombre}, sabemos que te interesa ${tema}. Sumate a ayudar a alguna de estas ONG's 💚`;
+      return `Hola {{ nombre }}, sabemos que te interesa {{ tema }}. Sumate a ayudar a alguna de estas ONG's 💚`;
     case "caido":
-      return `${nombre}, anteriormente donaste a ${tema}. Acá hay un resumen de lo que logramos este año gracias al apoyo de nuestros donantes mensuales. Te dejamos opciones más económicas para que vuelvas a apoyarnos 🙏`;
+      return `{{ nombre }}, anteriormente donaste a {{ tema }}. Acá hay un resumen de lo que logramos este año gracias al apoyo de nuestros donantes mensuales. Te dejamos opciones más económicas para que vuelvas a apoyarnos 🙏`;
     case "unica":
-      return `¡Gracias por tu donación, ${nombre}! ¿Querés multiplicar tu impacto? Suscribite mensualmente y acompañanos todo el año 💚`;
+      return `¡Gracias por tu donación, {{ nombre }}! ¿Querés multiplicar tu impacto? Suscribite mensualmente y acompañanos todo el año 💚`;
     case "mensual":
-      return `¡Gracias por tu apoyo mensual, ${nombre}! Tu aporte sostiene cada una de nuestras campañas. Te compartimos cómo se está usando 💚`;
+      return `¡Gracias por tu apoyo mensual, {{ nombre }}! Tu aporte sostiene cada una de nuestras campañas. Te compartimos cómo se está usando 💚`;
   }
+}
+
+// Renderiza la plantilla del segmento de un donante reemplazando las variables
+// por sus datos reales. Es lo que se envía (un mensaje personalizado por donante).
+export function renderTemplate(donor: MockDonor): string {
+  return getSegmentTemplate(getSegment(donor))
+    .replace(/\{\{\s*nombre\s*\}\}/g, donor.name.split(" ")[0])
+    .replace(/\{\{\s*tema\s*\}\}/g, interestLabel(donor));
 }
 
 // Mensajes de seguimiento para donantes de única vez (mes 1 y mes 2 posteriores).

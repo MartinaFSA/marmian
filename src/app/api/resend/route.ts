@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { mockDonors } from "@/data/mock-donors";
 
 function escapeHtml(value: string) {
   return value
@@ -29,10 +28,10 @@ function buildHtml(title: string, text: string) {
 }
 
 export async function POST(request: Request) {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "Falta la variable de entorno RESEND_API_KEY." },
+      { error: "Falta la variable de entorno RESEND_API." },
       { status: 500 },
     );
   }

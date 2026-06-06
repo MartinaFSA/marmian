@@ -1,23 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-// Datos MOCK de la organización (se reemplazan por la fila real de `organizations`
-// cuando esté la base).
-const MOCK_ORG = {
-  name: "Manos a la Olla",
-  category: "Asistencia alimentaria",
-  description:
-    "Cocinamos y repartimos viandas calientes en comedores del conurbano bonaerense.",
-  poc: "Ana López",
-  instagram: "@manosalaolla",
-  facebook: "manosalaolla",
-  linkedin: "",
-  whatsapp: "1145678901",
-  foundation_date: "2015-03-10",
+// Datos reales de la organización del usuario logueado. Se leen/escriben en la
+// tabla `organizations` (Supabase) vía /api/organizacion.
+type OrgForm = {
+  name: string;
+  category: string;
+  description: string;
+  poc: string;
+  instagram: string;
+  facebook: string;
+  linkedin: string;
+  whatsapp: string;
+  foundation_date: string;
 };
 
-type OrgForm = typeof MOCK_ORG;
+const EMPTY_ORG: OrgForm = {
+  name: "",
+  category: "",
+  description: "",
+  poc: "",
+  instagram: "",
+  facebook: "",
+  linkedin: "",
+  whatsapp: "",
+  foundation_date: "",
+};
 
 const FIELDS: { key: keyof OrgForm; label: string; type?: string; textarea?: boolean }[] = [
   { key: "name", label: "Nombre" },
@@ -32,19 +41,67 @@ const FIELDS: { key: keyof OrgForm; label: string; type?: string; textarea?: boo
 ];
 
 export default function OrganizacionPage() {
-  const [form, setForm] = useState<OrgForm>(MOCK_ORG);
+  const [form, setForm] = useState<OrgForm>(EMPTY_ORG);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Cargar la fila real de la organización.
+  useEffect(() => {
+    fetch("/api/organizacion")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("No se pudo cargar la organización.");
+        return res.json();
+      })
+      .then((data) => {
+        setForm({
+          ...EMPTY_ORG,
+          ...Object.fromEntries(
+            Object.keys(EMPTY_ORG).map((k) => [k, data?.[k] ?? ""]),
+          ),
+          // foundation_date viene como timestamptz; el input date espera YYYY-MM-DD.
+          foundation_date: data?.foundation_date
+            ? String(data.foundation_date).slice(0, 10)
+            : "",
+        });
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   const update = (key: keyof OrgForm, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setSaved(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Placeholder: todavía no persiste a la base.
-    setSaved(true);
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/organizacion", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error ?? "No se pudo guardar.");
+      }
+      setSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo guardar.");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-2xl text-neutral-500">Cargando…</div>
+    );
+  }
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -78,15 +135,15 @@ export default function OrganizacionPage() {
         <div className="flex items-center gap-3">
           <button
             type="submit"
-            className="rounded-lg bg-neutral-900 px-6 py-3 text-base font-medium text-white transition-opacity hover:opacity-90"
+            disabled={saving}
+            className="rounded-lg bg-neutral-900 px-6 py-3 text-base font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            Guardar
+            {saving ? "Guardando…" : "Guardar"}
           </button>
           {saved && (
-            <span className="text-sm text-green-600">
-              Guardado (placeholder, sin persistir).
-            </span>
+            <span className="text-sm text-green-600">Guardado.</span>
           )}
+          {error && <span className="text-sm text-red-600">{error}</span>}
         </div>
       </form>
     </div>
