@@ -257,16 +257,11 @@ export default function OnboardingFlow() {
       </ul>
     </div>
   ) : (
-<<<<<<< Updated upstream
-    <div className="flex min-h-64 items-center justify-center text-neutral-500">
-      
-=======
     <div className="imagen-completa">
       <img src="/iStock-2171791895.jpg" alt="Foto(s) stock" className="active-slide rounded-3xl" />
       <img src="/iStock-2199033973.jpg" alt="Foto(s) stock" className=" rounded-3xl" />
       <img src="/iStock-2205572960.jpg" alt="Foto(s) stock" className=" rounded-3xl" />
       <img src="/iStock-2258089084.jpg" alt="Foto(s) stock" className=" rounded-3xl" />
->>>>>>> Stashed changes
     </div>
   );
 
@@ -281,11 +276,7 @@ export default function OnboardingFlow() {
         </section>
 
         <aside
-<<<<<<< Updated upstream
-          className={`flex py-8 md:py-12 md:px-20 ${
-=======
           className={`flex ${
->>>>>>> Stashed changes
             showCampaigns
               ? "items-start"
               : "min-h-64 items-center justify-center  bg-neutral-200"
