@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.ts|*.tsx|*.js|*.jsx|*.mjs) jq -n --rawfile c \"${CLAUDE_PROJECT_DIR:-.}/.claude/next-docs-map.md\" '{hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:$c}}' ;; esac 2>/dev/null || true",
+            "statusMessage": "Cargando mapa de docs de Next…"
+          }
+        ]
+      }
+    ]
+  }
+}
