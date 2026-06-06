@@ -17,8 +17,13 @@ export default function DonateModal({
   campaign: Campaign;
   onClose: () => void;
 }) {
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("");
+  const [organization_id, setOrganizationId] = useState("");
+  const [interests, setInterests] = useState("");
+
   const [frequency, setFrequency] = useState<Frequency>("once");
   const [amount, setAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
@@ -48,12 +53,14 @@ export default function DonateModal({
         frequency === "monthly" ? "/api/mp/subscription" : "/api/mp/preference";
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           campaignId: campaign.id,
           amount,
           email: email.trim(),
-          phone: phone.trim(),
+          phone: phone.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -109,9 +116,7 @@ export default function DonateModal({
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-neutral-700">
-            Teléfono <span className="text-red-500">*</span>
-          </span>
+          <span className="text-sm text-neutral-700">Teléfono (opcional)</span>
           <input
             type="tel"
             value={phone}
@@ -130,11 +135,10 @@ export default function DonateModal({
                 type="button"
                 aria-pressed={frequency === f}
                 onClick={() => setFrequency(f)}
-                className={`flex-1 rounded-lg border px-3 py-2 text-sm transition-colors ${
-                  frequency === f
+                className={`flex-1 rounded-lg border px-3 py-2 text-sm transition-colors ${frequency === f
                     ? "border-neutral-900 bg-neutral-900 text-white"
                     : "border-neutral-300 hover:border-neutral-900"
-                }`}
+                  }`}
               >
                 {f === "once" ? "Única vez" : "Mensual"}
               </button>
@@ -151,11 +155,10 @@ export default function DonateModal({
                 type="button"
                 aria-pressed={amount === value && customAmount === ""}
                 onClick={() => selectPreset(value)}
-                className={`rounded-lg border px-4 py-2 text-sm transition-colors ${
-                  amount === value && customAmount === ""
+                className={`rounded-lg border px-4 py-2 text-sm transition-colors ${amount === value && customAmount === ""
                     ? "border-neutral-900 bg-neutral-900 text-white"
                     : "border-neutral-300 hover:border-neutral-900"
-                }`}
+                  }`}
               >
                 ${value.toLocaleString("es-AR")}
               </button>
