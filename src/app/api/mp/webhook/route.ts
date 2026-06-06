@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     if (body.type !== "payment") {
       return NextResponse.json({ ok: true });
     }
-console.log("WEBHOOK BODY:", JSON.stringify(body, null, 2));
+    console.log("WEBHOOK BODY:", JSON.stringify(body, null, 2));
     const paymentId = body.data.id;
 
     const response = await fetch(
@@ -21,13 +21,18 @@ console.log("WEBHOOK BODY:", JSON.stringify(body, null, 2));
     );
 
     const payment = await response.json();
-console.log("PAYMENT:", JSON.stringify(payment, null, 2));
+    console.log("PAYMENT:", JSON.stringify(payment, null, 2));
     if (payment.status !== "approved") {
       return NextResponse.json({ ok: true });
     }
-
     const metadata = payment.metadata;
-console.log("METADATA:", payment.metadata);
+
+    const interests = metadata.interests
+      ? Array.isArray(metadata.interests)
+        ? metadata.interests
+        : [metadata.interests]
+      : [];
+
     const { error } = await supabaseAdmin
       .from("donors")
       .insert({
@@ -36,7 +41,7 @@ console.log("METADATA:", payment.metadata);
         email: metadata.email,
         status: "paid",
         organization_id: metadata.organization_id,
-        interests: metadata.interests,
+        interests: interests,
       });
 
     if (error) {
