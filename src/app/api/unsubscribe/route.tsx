@@ -16,17 +16,29 @@ export async function PATCH(req: Request) {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    const { error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("donors")
-      .delete()
-      .eq("email", normalizedEmail);
+      .update({ status: "baja" })
+      .eq("email", normalizedEmail)
+      .select();
 
     if (error) {
       throw error;
     }
 
+    if (!data?.length) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "No se encontró un donante con ese email",
+        },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
+      donor: data[0],
     });
   } catch (error) {
     console.error(error);
