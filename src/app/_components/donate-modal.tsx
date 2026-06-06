@@ -63,7 +63,7 @@ export default function DonateModal({
           phone: phone.trim(),
           name: name.trim(),
           status: "activo",
-          organization_id: organization_id || null,
+          organization_id: organization_id || '21fd5d83-382c-434e-81da-149bf5a4d800',
           interests: interests || [],
         }),
       });
