@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 import { Preference } from "mercadopago";
 import { mpClient, getBaseUrl } from "@/lib/mp";
 import { getCampaign } from "@/data/campaigns";
+import { supabaseAdmin } from "@/lib/admin";
+import crypto from "crypto";
 
 // Donación por única vez: crea una preferencia de Checkout Pro y devuelve el
 // init_point del sandbox para redirigir al usuario a pagar.
 export async function POST(request: Request) {
   try {
-    const { campaignId, amount, email, phone } = await request.json();
+    const { campaignId, amount, email, name, phone, interests } =
+      await request.json();
 
     const campaign = getCampaign(Number(campaignId));
     if (!campaign) {
@@ -21,6 +24,30 @@ export async function POST(request: Request) {
         { error: "Email y monto son obligatorios" },
         { status: 400 },
       );
+    }
+
+    // La org del donante es la de la campaña (campaign.ongId = legacy_id).
+    const { data: org } = await supabaseAdmin
+      .from("organizations")
+      .select("id")
+      .eq("legacy_id", campaign.ongId)
+      .maybeSingle();
+
+    // Creamos el donante (pending) ahora; el webhook lo marca paid al aprobarse.
+    const externalReference = crypto.randomUUID();
+    const { error: donorError } = await supabaseAdmin.from("donors").insert({
+      name,
+      phone,
+      email,
+      status: "pending",
+      donation_type: "unica",
+      amount: Number(amount),
+      organization_id: org?.id ?? null,
+      interests: JSON.stringify(interests ?? []),
+      external_reference: externalReference,
+    });
+    if (donorError) {
+      throw donorError;
     }
 
     const baseUrl = getBaseUrl(request);
@@ -47,6 +74,7 @@ export async function POST(request: Request) {
           pending: `${baseUrl}/?mp=return`,
         },
         auto_return: "approved",
+        external_reference: externalReference,
         metadata: { campaign_id: campaign.id, ong_id: campaign.ongId },
       },
     });

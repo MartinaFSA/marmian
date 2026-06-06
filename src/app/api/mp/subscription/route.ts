@@ -9,15 +9,8 @@ import crypto from "crypto";
 // mensual y devuelve el init_point para que el usuario la autorice.
 export async function POST(request: Request) {
   try {
-    const {
-      campaignId,
-      amount,
-      email,
-      name,
-      phone,
-      organization_id,
-      interests,
-    } = await request.json();
+    const { campaignId, amount, email, name, phone, interests } =
+      await request.json();
 
     const campaign = getCampaign(Number(campaignId));
 
@@ -28,21 +21,27 @@ export async function POST(request: Request) {
       );
     }
 
+    // La org del donante es la de la campaña. campaign.ongId es el legacy_id;
+    // lo traducimos al uuid real de organizations.
+    const { data: org } = await supabaseAdmin
+      .from("organizations")
+      .select("id")
+      .eq("legacy_id", campaign.ongId)
+      .maybeSingle();
+
     const externalReference = crypto.randomUUID();
 
-    const { data: donor, error: donorError } = await supabaseAdmin
-      .from("donors")
-      .insert({
-        name,
-        phone,
-        email,
-        status: "pending",
-        organization_id,
-        interests,
-        external_reference: externalReference,
-      })
-      .select()
-      .single();
+    const { error: donorError } = await supabaseAdmin.from("donors").insert({
+      name,
+      phone,
+      email,
+      status: "pending",
+      donation_type: "mensual",
+      amount: Number(amount),
+      organization_id: org?.id ?? null,
+      interests: JSON.stringify(interests ?? []),
+      external_reference: externalReference,
+    });
 
     if (donorError) {
       throw donorError;

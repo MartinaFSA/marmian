@@ -26,18 +26,16 @@ console.log("WEBHOOK BODY:", JSON.stringify(body, null, 2));
       return NextResponse.json({ ok: true });
     }
 
-    const metadata = payment.metadata;
-console.log("METADATA:", payment.metadata);
+    // El donante ya se creó (status 'pending') al iniciar el pago, con este
+    // external_reference. Acá lo marcamos pagado y registramos el cobro.
+    const externalReference = payment.external_reference;
     const { error } = await supabaseAdmin
       .from("donors")
-      .insert({
-        name: metadata.name,
-        phone: metadata.phone,
-        email: metadata.email,
-        status: metadata.status,
-        organization_id: metadata.organization_id,
-        interests: metadata.interests,
-      });
+      .update({
+        status: "paid",
+        last_charge_at: new Date().toISOString(),
+      })
+      .eq("external_reference", externalReference);
 
     if (error) {
       throw error;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Campaign } from "@/data/campaigns";
+import { readOnboarding } from "@/lib/onboarding";
 
 type Frequency = "once" | "monthly";
 
@@ -17,12 +18,9 @@ export default function DonateModal({
   campaign: Campaign;
   onClose: () => void;
 }) {
-  const [name, setName] = useState("");
+  const [name, setName] = useState(() => readOnboarding().name);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState("");
-  const [organization_id, setOrganizationId] = useState("");
-  const [interests, setInterests] = useState("");
 
   const [frequency, setFrequency] = useState<Frequency>("once");
   const [amount, setAmount] = useState<number | null>(null);
@@ -31,7 +29,11 @@ export default function DonateModal({
   const [error, setError] = useState<string | null>(null);
 
   const canPay =
-    isValidEmail(email) && phone.trim() !== "" && !!amount && amount > 0;
+    name.trim() !== "" &&
+    isValidEmail(email) &&
+    phone.trim() !== "" &&
+    !!amount &&
+    amount > 0;
 
   const selectPreset = (value: number) => {
     setAmount(value);
@@ -59,8 +61,10 @@ export default function DonateModal({
         body: JSON.stringify({
           campaignId: campaign.id,
           amount,
+          name: name.trim(),
           email: email.trim(),
           phone: phone.trim() || undefined,
+          interests: readOnboarding().interests,
         }),
       });
       const data = await res.json();
@@ -101,6 +105,19 @@ export default function DonateModal({
             ×
           </button>
         </div>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-sm text-neutral-700">
+            Nombre <span className="text-red-500">*</span>
+          </span>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Tu nombre"
+            className="rounded-lg border border-neutral-300 px-3 py-2 outline-none focus:border-neutral-900"
+          />
+        </label>
 
         <label className="flex flex-col gap-1">
           <span className="text-sm text-neutral-700">
