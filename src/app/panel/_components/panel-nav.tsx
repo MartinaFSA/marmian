@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/panel", label: "Panel" },
   { href: "/panel/donantes", label: "Donantes" },
   { href: "/panel/organizacion", label: "Organización" },
+  { href: "/panel/campana", label: "Campaña" },
 ];
 
 export default function PanelNav() {

@@ -11,6 +11,11 @@ const CARDS = [
     title: "Organización",
     description: "Editá los datos y redes de tu organización.",
   },
+  {
+    href: "/panel/campana",
+    title: "Campaña",
+    description: "Diseñá una campaña con título y texto y mirá el email de ejemplo.",
+  },
 ];
 
 export default function PanelPage() {
