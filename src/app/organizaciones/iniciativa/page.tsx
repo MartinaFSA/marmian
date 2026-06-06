@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getCampaign } from "@/data/campaigns";
-import { ongs } from "@/data/ongs";
+import { getOngByLegacyId } from "@/lib/organizations";
 
 export default async function IniciativaPage({
   searchParams,
@@ -22,7 +22,7 @@ export default async function IniciativaPage({
     );
   }
 
-  const ong = ongs.find((o) => o.id === campaign.ongId);
+  const ong = await getOngByLegacyId(campaign.ongId);
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-6 p-6 md:p-10">

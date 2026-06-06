@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { orgTypes } from "@/data/organization-types";
-import { recommendOngs } from "@/data/ongs";
+import { fetchOngs, recommendOngs, type Ong } from "@/lib/organizations";
 import { campaignsByOng, type Campaign } from "@/data/campaigns";
 import { readOnboarding, saveOnboarding } from "@/lib/onboarding";
 import DonateModal from "./donate-modal";
@@ -39,8 +39,14 @@ export default function OnboardingFlow() {
   const [name, setName] = useState("");
   const [interests, setInterests] = useState<number[]>([]);
   const [interestedOngIds, setInterestedOngIds] = useState<number[]>([]);
+  const [ongs, setOngs] = useState<Ong[]>([]);
   const [donateCampaign, setDonateCampaign] = useState<Campaign | null>(null);
   const [result, setResult] = useState<PaymentResult | null>(null);
+
+  // Cargar las ONGs desde Supabase (antes era un array estático).
+  useEffect(() => {
+    fetchOngs().then(setOngs);
+  }, []);
 
   // Hidratar desde localStorage y detectar retorno de Mercado Pago.
   useEffect(() => {
@@ -78,7 +84,10 @@ export default function OnboardingFlow() {
   };
 
   const canContinue = name.trim().length >= 2 && interests.length >= 1;
-  const recommended = useMemo(() => recommendOngs(interests), [interests]);
+  const recommended = useMemo(
+    () => recommendOngs(ongs, interests),
+    [ongs, interests],
+  );
 
   const interestedCampaigns = useMemo(
     () =>
